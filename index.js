@@ -26,7 +26,9 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
+
+        const userCollection = client.db('techHorizon').collection('users');
 
         // JWT token create //
         app.post('/jwt', async (req, res) => {
@@ -64,18 +66,29 @@ async function run() {
         }
 
         // Add a new user to userCollection //    
-        // app.post('/users', async (req, res) => {
-        //     const user = req.body;
+        app.post('/users', async (req, res) => {
+            const user = req.body;
 
-        //     // Check if this email already exists or not // 
-        //     const query = { email: user.email };
-        //     const existingUser = await userCollection.findOne(query);
-        //     if (existingUser) {
-        //         return res.send({ message: 'User already exists!!' });
-        //     }
-        //     const result = await userCollection.insertOne(user);
-        //     res.send(result);
-        // });
+            // Check if this email already exists or not // 
+            const query = { email: user.email };
+            const existingUser = await userCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'User already exists!!' });
+            }
+            const result = await userCollection.insertOne({
+                ...user,
+                role: 'User'
+            });
+            res.send(result);
+        });
+
+        // Get user role // 
+        app.get('/user/role/:email', async(req, res) => {
+            const email = req.params.email;
+            const query = {email: email};
+            const result = await userCollection.findOne(query);
+            res.send({role: result?.role});
+        })
 
         // Get all users from userCollection //
         // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
@@ -166,7 +179,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send("Bistro Boss Restaurant.......")
+    res.send("Tech Horizon.......")
 });
 
 app.listen(port, () => {
