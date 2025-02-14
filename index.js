@@ -29,6 +29,7 @@ async function run() {
         // await client.connect();
 
         const userCollection = client.db('techHorizon').collection('users');
+        const productsCollection = client.db('techHorizon').collection('products');
 
         // JWT token create //
         app.post('/jwt', async (req, res) => {
@@ -88,15 +89,14 @@ async function run() {
             const query = {email: email};
             const result = await userCollection.findOne(query);
             res.send({role: result?.role});
-        })
+        });
+
 
         // Get all users from userCollection //
         // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
         //     const result = await userCollection.find().toArray();
         //     res.send(result);
         // });
-
-
 
         // Delete a user from userCollection //
         // app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
@@ -105,6 +105,21 @@ async function run() {
         //     const result = await userCollection.deleteOne(query);
         //     res.send(result);
         // });
+
+
+        // Add or save a product to productsCollection //
+        app.post('/products', async(req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result);
+        });
+
+        // Get all products form productsCollection //
+        app.get('/products', async(req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
+
 
         // Make Admin API //
         // app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
