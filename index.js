@@ -61,7 +61,7 @@ async function run() {
             const user = await userCollection.findOne(query);
             const isAdmin = user?.role === 'admin';
             if (!isAdmin) {
-                return res.status(403).send({ message: 'firbidden access!!' })
+                return res.status(403).send({ message: 'forbidden access!!' })
             }
             next();
         }
@@ -108,7 +108,7 @@ async function run() {
 
 
         // Add or save a product to productsCollection //
-        app.post('/products', async(req, res) => {
+        app.post('/products', verifyToken, async(req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
             res.send(result);
@@ -117,6 +117,14 @@ async function run() {
         // Get all products form productsCollection //
         app.get('/products', async(req, res) => {
             const result = await productsCollection.find().toArray();
+            res.send(result);
+        });
+
+        // Get a specific product from productsCollection //
+        app.get('/product/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await productsCollection.findOne(query);
             res.send(result);
         })
 
