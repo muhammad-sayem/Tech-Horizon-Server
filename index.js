@@ -116,7 +116,8 @@ async function run() {
 
         // Get all products form productsCollection //
         app.get('/products', async(req, res) => {
-            const result = await productsCollection.find().toArray();
+            const query = {status: 'Accepted'}
+            const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
 
@@ -128,15 +129,54 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/product/upvote/:id', async(req, res) => {
+        // Increase upvote count of a product //
+        app.patch('/product/upvote/:id', verifyToken, async(req, res) => {
             const id = req.params.id;
+            const userEmail = req.decoded.email;
             const query = {_id: new ObjectId(id)};
+            const product = await productsCollection.findOne(query);
+
+            if(product.upVotedUsers && product.upVotedUsers.includes(userEmail)){
+                return res.status(400).send({message: "You have already upvoted the product"})
+            }
+
             const updatedDoc = {
-                $inc: {upvotes: 1}
+                $inc: {upvotes: 1},
+                $push: {upVotedUsers: userEmail}
             }
             const result = await productsCollection.updateOne(query, updatedDoc);
             res.send(result);
-        })
+        });
+
+        // Change status of the product to 'Accepted' //
+        app.patch('/product/accept-status/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updatedDoc = {
+                $set: {
+                    status: 'Accepted'
+                }
+            }
+            const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+        // Change status of the product to 'Rejected' //
+        app.patch('/product/reject-status/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updatedDoc = {
+                $set: {
+                    status: 'Rejected'
+                }
+            }
+            const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+
+
+
 
 
         // Make Admin API //
