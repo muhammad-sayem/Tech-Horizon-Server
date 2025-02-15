@@ -126,6 +126,16 @@ async function run() {
             const query = {_id: new ObjectId(id)};
             const result = await productsCollection.findOne(query);
             res.send(result);
+        });
+
+        app.patch('/product/upvote/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const updatedDoc = {
+                $inc: {upvotes: 1}
+            }
+            const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
         })
 
 
