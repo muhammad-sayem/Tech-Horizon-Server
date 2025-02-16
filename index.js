@@ -223,6 +223,16 @@ async function run() {
             res.send(result);
         });
 
+        // Get all featured products //
+        app.get('/featured', async(req, res) => {
+            const result = await featuredCollection
+            .find()
+            .sort({featuredAt: -1})
+            .toArray();
+
+            res.send(result);
+        });
+
         // Update a product's featured property to true //
         app.patch('/product/feature-true/:id', async(req, res) => {
             const id = req.params.id;
