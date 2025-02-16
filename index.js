@@ -114,12 +114,25 @@ async function run() {
             res.send(result);
         });
 
-        // Get all products form productsCollection //
+        // Get all products //
+        app.get('/all-products', async(req, res) => {
+            const result = await productsCollection.find().toArray();
+            res.send(result);
+        })
+
+        // Get all accepted products form productsCollection //
         app.get('/products', async(req, res) => {
             const query = {status: 'Accepted'}
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
+
+        // Get all reported products //
+        app.get('/producs/reported', async(req, res) => {
+            const query = {reported: true};
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        })
 
         // Get a specific product from productsCollection //
         app.get('/product/:id', async(req, res) => {
@@ -171,6 +184,34 @@ async function run() {
                 }
             }
             const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+        // Update a product if report //
+        app.patch('/product/report/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+
+            const product = await productsCollection.findOne(query);
+            if(!product){
+                return res.status(404).send({message: "Product not found"})
+            }
+
+            const updatedDoc = {
+                $set: {
+                    reported: true
+                }
+            }
+
+            const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+        // Delete a product from productsCollection //
+        app.delete('/product/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await productsCollection.deleteOne(query);
             res.send(result);
         });
 
