@@ -221,7 +221,26 @@ async function run() {
             const product = req.body;
             const result = await featuredCollection.insertOne(product);
             res.send(result);
-        })
+        });
+
+        // Update a product's featured property to true //
+        app.patch('/product/feature-true/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const product = await productsCollection.findOne(query);
+            if(!product){
+                return res.status(404).send({message: "Product not found"})
+            }
+
+            const updatedDoc = {
+                $set: {
+                    featured: true
+                }
+            }
+
+            const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
 
 
 
