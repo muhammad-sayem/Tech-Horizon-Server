@@ -30,6 +30,7 @@ async function run() {
 
         const userCollection = client.db('techHorizon').collection('users');
         const productsCollection = client.db('techHorizon').collection('products');
+        const featuredCollection = client.db('techHorizon').collection('featured');
 
         // JWT token create //
         app.post('/jwt', async (req, res) => {
@@ -214,6 +215,13 @@ async function run() {
             const result = await productsCollection.deleteOne(query);
             res.send(result);
         });
+
+        // Add a product in featuredProducts // 
+        app.post('/featured', async(req, res) => {
+            const product = req.body;
+            const result = await featuredCollection.insertOne(product);
+            res.send(result);
+        })
 
 
 
