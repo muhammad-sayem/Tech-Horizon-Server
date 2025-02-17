@@ -162,6 +162,25 @@ async function run() {
             res.send(result);
         });
 
+        // Increase upvote count of a featured product //
+        app.patch('/product/feature-upvote/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const userEmail = req.decoded.email;
+            const query = { _id: id };
+            const product = await featuredCollection.findOne(query);
+
+            if (product.upVotedUsers && product.upVotedUsers.includes(userEmail)) {
+                return res.status(400).send({ message: "You have already upvoted the product" })
+            }
+
+            const updatedDoc = {
+                $inc: { upvotes: 1 },
+                $push: { upVotedUsers: userEmail }
+            }
+            const result = await featuredCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
 
         // Change status of the product to 'Accepted' //
         app.patch('/product/accept-status/:id', async (req, res) => {
