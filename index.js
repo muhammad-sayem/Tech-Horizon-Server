@@ -228,6 +228,14 @@ async function run() {
             res.send(result);
         });
 
+        // Get all products added by an email //
+        app.get('/products/:email', async(req, res) => {
+            const email = req.params.email;
+            const query = {"owner.email": email};
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
+
         // Delete a product from productsCollection //
         app.delete('/product/:id', async (req, res) => {
             const id = req.params.id;
@@ -269,6 +277,24 @@ async function run() {
             }
 
             const result = await productsCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        });
+
+        // Delete a product from featured //
+        app.delete('/featured/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: id};
+            const result = await featuredCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        // Get trending products by likes from productsCollection //
+        app.get('/trending-products', async(req, res) => {
+            const query = {status: "Accepted"};
+            const result = await productsCollection
+            .find(query)
+            .sort({upvotes: -1})
+            .toArray();
             res.send(result);
         });
 
