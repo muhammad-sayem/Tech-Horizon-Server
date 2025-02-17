@@ -85,11 +85,11 @@ async function run() {
         });
 
         // Get user role // 
-        app.get('/user/role/:email', async(req, res) => {
+        app.get('/user/role/:email', async (req, res) => {
             const email = req.params.email;
-            const query = {email: email};
+            const query = { email: email };
             const result = await userCollection.findOne(query);
-            res.send({role: result?.role});
+            res.send({ role: result?.role });
         });
 
 
@@ -109,63 +109,64 @@ async function run() {
 
 
         // Add or save a product to productsCollection //
-        app.post('/products', verifyToken, async(req, res) => {
+        app.post('/products', verifyToken, async (req, res) => {
             const product = req.body;
             const result = await productsCollection.insertOne(product);
             res.send(result);
         });
 
         // Get all products //
-        app.get('/all-products', async(req, res) => {
+        app.get('/all-products', async (req, res) => {
             const result = await productsCollection.find().toArray();
             res.send(result);
         })
 
         // Get all accepted products form productsCollection //
-        app.get('/products', async(req, res) => {
-            const query = {status: 'Accepted'}
+        app.get('/products', async (req, res) => {
+            const query = { status: 'Accepted' }
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
 
         // Get all reported products //
-        app.get('/producs/reported', async(req, res) => {
-            const query = {reported: true};
+        app.get('/producs/reported', async (req, res) => {
+            const query = { reported: true };
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         })
 
         // Get a specific product from productsCollection //
-        app.get('/product/:id', async(req, res) => {
+        app.get('/product/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await productsCollection.findOne(query);
             res.send(result);
         });
 
         // Increase upvote count of a product //
-        app.patch('/product/upvote/:id', verifyToken, async(req, res) => {
+        app.patch('/product/upvote/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const userEmail = req.decoded.email;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const product = await productsCollection.findOne(query);
 
-            if(product.upVotedUsers && product.upVotedUsers.includes(userEmail)){
-                return res.status(400).send({message: "You have already upvoted the product"})
+            if (product.upVotedUsers && product.upVotedUsers.includes(userEmail)) {
+                return res.status(400).send({ message: "You have already upvoted the product" })
             }
 
             const updatedDoc = {
-                $inc: {upvotes: 1},
-                $push: {upVotedUsers: userEmail}
+                $inc: { upvotes: 1 },
+                $push: { upVotedUsers: userEmail }
             }
             const result = await productsCollection.updateOne(query, updatedDoc);
             res.send(result);
         });
 
+
         // Change status of the product to 'Accepted' //
-        app.patch('/product/accept-status/:id', async(req, res) => {
+        app.patch('/product/accept-status/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updatedDoc = {
                 $set: {
                     status: 'Accepted'
@@ -176,9 +177,9 @@ async function run() {
         });
 
         // Change status of the product to 'Rejected' //
-        app.patch('/product/reject-status/:id', async(req, res) => {
+        app.patch('/product/reject-status/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const updatedDoc = {
                 $set: {
                     status: 'Rejected'
@@ -189,13 +190,13 @@ async function run() {
         });
 
         // Update a product if report //
-        app.patch('/product/report/:id', async(req, res) => {
+        app.patch('/product/report/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
 
             const product = await productsCollection.findOne(query);
-            if(!product){
-                return res.status(404).send({message: "Product not found"})
+            if (!product) {
+                return res.status(404).send({ message: "Product not found" })
             }
 
             const updatedDoc = {
@@ -209,37 +210,37 @@ async function run() {
         });
 
         // Delete a product from productsCollection //
-        app.delete('/product/:id', async(req, res) => {
+        app.delete('/product/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await productsCollection.deleteOne(query);
             res.send(result);
         });
 
         // Add a product in featuredProducts // 
-        app.post('/featured', async(req, res) => {
+        app.post('/featured', async (req, res) => {
             const product = req.body;
             const result = await featuredCollection.insertOne(product);
             res.send(result);
         });
 
         // Get all featured products //
-        app.get('/featured', async(req, res) => {
+        app.get('/featured', async (req, res) => {
             const result = await featuredCollection
-            .find()
-            .sort({featuredAt: -1})
-            .toArray();
+                .find()
+                .sort({ featuredAt: -1 })
+                .toArray();
 
             res.send(result);
         });
 
         // Update a product's featured property to true //
-        app.patch('/product/feature-true/:id', async(req, res) => {
+        app.patch('/product/feature-true/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const product = await productsCollection.findOne(query);
-            if(!product){
-                return res.status(404).send({message: "Product not found"})
+            if (!product) {
+                return res.status(404).send({ message: "Product not found" })
             }
 
             const updatedDoc = {
