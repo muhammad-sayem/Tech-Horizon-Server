@@ -236,6 +236,32 @@ async function run() {
             res.send(result);
         });
 
+        // Update a product in productsCollection //
+        app.put('/product/update/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const productData = req.body;
+            const updatedDoc = {
+                $set: productData
+            }
+            const options = {upsert: true}
+            const result = await productsCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        })
+
+        // Update a product in featuredCollection //
+        app.put('/featured/update/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: id}
+            const featuredProductData = req.body;
+            const updatedDoc = {
+                $set: featuredProductData
+            }
+            const options = {upsert: true}
+            const result = await featuredCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        })
+
         // Delete a product from productsCollection //
         app.delete('/product/:id', async (req, res) => {
             const id = req.params.id;
