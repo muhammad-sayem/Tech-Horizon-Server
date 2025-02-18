@@ -31,6 +31,7 @@ async function run() {
         const userCollection = client.db('techHorizon').collection('users');
         const productsCollection = client.db('techHorizon').collection('products');
         const featuredCollection = client.db('techHorizon').collection('featured');
+        const reviewsCollection = client.db('techHorizon').collection('reviews');
 
         // JWT token create //
         app.post('/jwt', async (req, res) => {
@@ -323,6 +324,21 @@ async function run() {
             .toArray();
             res.send(result);
         });
+
+        // Save or add a review in reviewsCollection //
+        app.post('/reviews', async(req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.send(result);
+        });
+
+        // Get a specific review from reviewsCollection //
+        app.get('/review/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {productId: id};
+            const result = await reviewsCollection.find(query).toArray();
+            res.send(result);
+        })
 
 
 
