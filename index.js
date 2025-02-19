@@ -61,7 +61,7 @@ async function run() {
             const email = req.decoded.email;
             const query = { email: email };
             const user = await userCollection.findOne(query);
-            const isAdmin = user?.role === 'admin';
+            const isAdmin = user?.role === 'Admin';
             if (!isAdmin) {
                 return res.status(403).send({ message: 'forbidden access!!' })
             }
@@ -95,10 +95,10 @@ async function run() {
 
 
         // Get all users from userCollection //
-        // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-        //     const result = await userCollection.find().toArray();
-        //     res.send(result);
-        // });
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        });
 
         // Delete a user from userCollection //
         // app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
@@ -120,7 +120,7 @@ async function run() {
         app.get('/all-products', async (req, res) => {
             const result = await productsCollection.find().toArray();
             res.send(result);
-        })
+        });
 
         // Get all accepted products form productsCollection //
         app.get('/products', async (req, res) => {
@@ -346,17 +346,30 @@ async function run() {
 
 
         // Make Admin API //
-        // app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
-        //     const id = req.params.id;
-        //     const filter = { _id: new ObjectId(id) };
-        //     const updatedDoc = {
-        //         $set: {
-        //             role: "Admin",
-        //         }
-        //     };
-        //     const result = await userCollection.updateOne(filter, updatedDoc);
-        //     res.send(result);
-        // })
+        app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: "Admin",
+                }
+            };
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
+        // Make Moderator API //
+        app.patch('/users/moderator/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    role: "Moderator",
+                }
+            };
+            const result = await userCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
 
 
         // Create payment intent //
