@@ -124,9 +124,20 @@ async function run() {
 
         // Get all accepted products form productsCollection //
         app.get('/products', async (req, res) => {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 6;
+            const skip = (page-1) * limit;
             const query = { status: 'Accepted' }
-            const result = await productsCollection.find(query).toArray();
-            res.send(result);
+
+            if(req.query.search){
+                query.tags = {
+                    $regex: req.query.search,
+                    $options: "i"
+                }
+            }
+            const products = await productsCollection.find(query).skip(skip).limit(limit).toArray();
+            const totalProducts = await productsCollection.countDocuments(query)
+            res.send({products, totalProducts});
         });
 
         // Get all reported products //
@@ -435,5 +446,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Bistro Boss Restaurant server is running on port${port}`);
+    console.log(`Tech Horizon server is running on port ${port}`);
 })
