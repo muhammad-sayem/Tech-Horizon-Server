@@ -32,6 +32,7 @@ async function run() {
         const productsCollection = client.db('techHorizon').collection('products');
         const featuredCollection = client.db('techHorizon').collection('featured');
         const reviewsCollection = client.db('techHorizon').collection('reviews');
+        const couponsCollection = client.db('techHorizon').collection('coupons');
 
         // JWT token create //
         app.post('/jwt', async (req, res) => {
@@ -358,7 +359,20 @@ async function run() {
             const reviewsCount = await reviewsCollection.countDocuments();
 
             res.send({usersCount, productsCount, reviewsCount});
-        })
+        });
+
+        // Add a coupon to the couponsCollection //
+        app.post('/add-coupon', async(req, res) => {
+            const coupon = req.body;
+            const result = await couponsCollection.insertOne(coupon);
+            res.send(result);
+        });
+
+        // Get All coupons from couponsCollection //
+        app.get('/coupons', async(req, res) => {
+            const result = await couponsCollection.find().toArray();
+            res.send(result);
+        });
 
 
 
@@ -389,7 +403,7 @@ async function run() {
             };
             const result = await userCollection.updateOne(filter, updatedDoc);
             res.send(result);
-        })
+        });
 
 
         // Create payment intent //
