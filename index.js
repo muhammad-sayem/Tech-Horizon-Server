@@ -374,13 +374,28 @@ async function run() {
             res.send(result);
         });
 
+        // Edit a coupon's information //
+        app.put('/coupon/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const couponData = req.body;
+            const updatedDoc = {
+                $set: couponData
+            }
+            const options = {upsert: true}
+            const result = await couponsCollection.updateOne(query, updatedDoc, options);
+            res.send(result);
+        })
+
         // Delete a coupon from couponsCollection //
         app.delete('/coupon/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: new ObjectId(id)};
             const result = await couponsCollection.deleteOne(query);
             res.send(result);
-        })
+        });
+
+
 
 
 
