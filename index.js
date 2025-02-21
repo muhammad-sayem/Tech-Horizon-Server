@@ -349,6 +349,15 @@ async function run() {
             const query = {productId: id};
             const result = await reviewsCollection.find(query).toArray();
             res.send(result);
+        });
+
+        // Get admin stats api //
+        app.get('/admin-stats', async(req, res) => {
+            const usersCount = await userCollection.countDocuments();
+            const productsCount = await productsCollection.countDocuments();
+            const reviewsCount = await reviewsCollection.countDocuments();
+
+            res.send({usersCount, productsCount, reviewsCount});
         })
 
 
