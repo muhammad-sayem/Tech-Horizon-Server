@@ -81,7 +81,8 @@ async function run() {
             }
             const result = await userCollection.insertOne({
                 ...user,
-                role: 'User'
+                role: 'User',
+                subscribed: false
             });
             res.send(result);
         });
@@ -96,7 +97,7 @@ async function run() {
 
 
         // Get all users from userCollection //
-        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result);
         });
