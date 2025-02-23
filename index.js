@@ -102,6 +102,19 @@ async function run() {
             res.send(result);
         });
 
+        // Change user status to subscribe //
+        app.patch('/user/status-subscribed/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    subscribed: true
+                }
+            }
+            const result = await userCollection.updateOne(query, updatedDoc);
+            res.send(result);
+        })
+
         // Delete a user from userCollection //
         // app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
         //     const id = req.params.id;
@@ -128,10 +141,10 @@ async function run() {
         app.get('/products', async (req, res) => {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 6;
-            const skip = (page-1) * limit;
+            const skip = (page - 1) * limit;
             const query = { status: 'Accepted' }
 
-            if(req.query.search){
+            if (req.query.search) {
                 query.tags = {
                     $regex: req.query.search,
                     $options: "i"
@@ -139,7 +152,7 @@ async function run() {
             }
             const products = await productsCollection.find(query).skip(skip).limit(limit).toArray();
             const totalProducts = await productsCollection.countDocuments(query)
-            res.send({products, totalProducts});
+            res.send({ products, totalProducts });
         });
 
         // Get all reported products //
@@ -243,35 +256,35 @@ async function run() {
         });
 
         // Get all products added by an email //
-        app.get('/products/:email', async(req, res) => {
+        app.get('/products/:email', async (req, res) => {
             const email = req.params.email;
-            const query = {"owner.email": email};
+            const query = { "owner.email": email };
             const result = await productsCollection.find(query).toArray();
             res.send(result);
         });
 
         // Update a product in productsCollection //
-        app.put('/product/update/:id', async(req, res) => {
+        app.put('/product/update/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const productData = req.body;
             const updatedDoc = {
                 $set: productData
             }
-            const options = {upsert: true}
+            const options = { upsert: true }
             const result = await productsCollection.updateOne(query, updatedDoc, options);
             res.send(result);
         })
 
         // Update a product in featuredCollection //
-        app.put('/featured/update/:id', async(req, res) => {
+        app.put('/featured/update/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: id}
+            const query = { _id: id }
             const featuredProductData = req.body;
             const updatedDoc = {
                 $set: featuredProductData
             }
-            const options = {upsert: true}
+            const options = { upsert: true }
             const result = await featuredCollection.updateOne(query, updatedDoc, options);
             res.send(result);
         })
@@ -321,77 +334,77 @@ async function run() {
         });
 
         // Delete a product from featured //
-        app.delete('/featured/:id', async(req, res) => {
+        app.delete('/featured/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: id};
+            const query = { _id: id };
             const result = await featuredCollection.deleteOne(query);
             res.send(result);
         })
 
         // Get trending products by likes from productsCollection //
-        app.get('/trending-products', async(req, res) => {
-            const query = {status: "Accepted"};
+        app.get('/trending-products', async (req, res) => {
+            const query = { status: "Accepted" };
             const result = await productsCollection
-            .find(query)
-            .sort({upvotes: -1})
-            .toArray();
+                .find(query)
+                .sort({ upvotes: -1 })
+                .toArray();
             res.send(result);
         });
 
         // Save or add a review in reviewsCollection //
-        app.post('/reviews', async(req, res) => {
+        app.post('/reviews', async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result);
         });
 
         // Get a specific review from reviewsCollection //
-        app.get('/review/:id', async(req, res) => {
+        app.get('/review/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {productId: id};
+            const query = { productId: id };
             const result = await reviewsCollection.find(query).toArray();
             res.send(result);
         });
 
         // Get admin stats api //
-        app.get('/admin-stats', async(req, res) => {
+        app.get('/admin-stats', async (req, res) => {
             const usersCount = await userCollection.countDocuments();
             const productsCount = await productsCollection.countDocuments();
             const reviewsCount = await reviewsCollection.countDocuments();
 
-            res.send({usersCount, productsCount, reviewsCount});
+            res.send({ usersCount, productsCount, reviewsCount });
         });
 
         // Add a coupon to the couponsCollection //
-        app.post('/add-coupon', async(req, res) => {
+        app.post('/add-coupon', async (req, res) => {
             const coupon = req.body;
             const result = await couponsCollection.insertOne(coupon);
             res.send(result);
         });
 
         // Get All coupons from couponsCollection //
-        app.get('/coupons', async(req, res) => {
+        app.get('/coupons', async (req, res) => {
             const result = await couponsCollection.find().toArray();
             res.send(result);
         });
 
         // Edit a coupon's information //
-        app.put('/coupon/:id', async(req, res) => {
+        app.put('/coupon/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const couponData = req.body;
             const updatedDoc = {
                 $set: couponData
             }
-            const options = {upsert: true}
+            const options = { upsert: true }
             const result = await couponsCollection.updateOne(query, updatedDoc, options);
             res.send(result);
         })
 
         // Delete a coupon from couponsCollection //
-        app.delete('/coupon/:id', async(req, res) => {
+        app.delete('/coupon/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await couponsCollection.deleteOne(query);
             res.send(result);
         });
@@ -429,6 +442,7 @@ async function run() {
             res.send(result);
         });
 
+        
 
         // Create payment intent //
         // app.post('/create-payment-intent', async (req, res) => {
