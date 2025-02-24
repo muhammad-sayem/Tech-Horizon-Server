@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const port = process.env.PORT || 5000;
 
 // Middlewares //
@@ -102,7 +102,7 @@ async function run() {
             res.send(result);
         });
 
-        // Change user status to subscribe //
+        // Change user status to subscribed //
         app.patch('/user/status-subscribed/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -409,6 +409,8 @@ async function run() {
             res.send(result);
         });
 
+        //
+
 
 
 
@@ -442,7 +444,22 @@ async function run() {
             res.send(result);
         });
 
-        
+        // Create Payment Intent //
+        app.post('/create-payment-intent', verifyToken, async (req, res) => {
+            const { price } = req.body;
+            const finalPrice = price * 100;
+
+            const {client_secret} = await stripe.paymentIntents.create({
+                amount: finalPrice,
+                currency: 'usd',
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+            res.send({clientSecret: client_secret});
+        })
+
+
 
         // Create payment intent //
         // app.post('/create-payment-intent', async (req, res) => {
