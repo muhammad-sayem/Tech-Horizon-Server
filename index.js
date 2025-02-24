@@ -131,6 +131,29 @@ async function run() {
             res.send(result);
         });
 
+        // app.post('/products', verifyToken, async (req, res) => {
+        //     const { email } = req.body; 
+        //     const user = await userCollection.findOne({ email });
+        
+        //     if (!user) {
+        //         return res.status(404).send({ message: "User not found" });
+        //     }
+        
+            
+        //     const existingProducts = await productsCollection.countDocuments({ email });
+        //     if (!user.subscribed && existingProducts >= 1) {
+        //         return res.status(403).send({ message: "Free users can only add 1 product. Upgrade to add more." });
+        //     }
+        
+           
+        //     const result = await productsCollection.insertOne(req.body);
+        //     res.send(result);
+        // });
+        
+
+       
+        
+
         // Get all products //
         app.get('/all-products', async (req, res) => {
             const result = await productsCollection.find().toArray();
