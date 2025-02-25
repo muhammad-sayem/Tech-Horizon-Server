@@ -69,6 +69,17 @@ async function run() {
             next();
         }
 
+        const verifyModerator = async (req, res, next) => {
+            const email = req.decoded.email;
+            const query = { email: email };
+            const user = await userCollection.findOne(query);
+            const isModerator = user?.role === 'Moderator';
+            if (!isModerator) {
+                return res.status(403).send({ message: 'forbidden access!!' })
+            }
+            next();
+        }
+
         // Add a new user to userCollection //    
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -179,7 +190,7 @@ async function run() {
         });
 
         // Get all reported products //
-        app.get('/producs/reported', async (req, res) => {
+        app.get('/products/reported', async (req, res) => {
             const query = { reported: true };
             const result = await productsCollection.find(query).toArray();
             res.send(result);
