@@ -108,7 +108,7 @@ async function run() {
 
 
         // Get all users from userCollection //
-        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result);
         });
@@ -145,25 +145,25 @@ async function run() {
         // app.post('/products', verifyToken, async (req, res) => {
         //     const { email } = req.body; 
         //     const user = await userCollection.findOne({ email });
-        
+
         //     if (!user) {
         //         return res.status(404).send({ message: "User not found" });
         //     }
-        
-            
+
+
         //     const existingProducts = await productsCollection.countDocuments({ email });
         //     if (!user.subscribed && existingProducts >= 1) {
         //         return res.status(403).send({ message: "Free users can only add 1 product. Upgrade to add more." });
         //     }
-        
-           
+
+
         //     const result = await productsCollection.insertOne(req.body);
         //     res.send(result);
         // });
-        
 
-       
-        
+
+
+
 
         // Get all products //
         app.get('/all-products', async (req, res) => {
@@ -242,6 +242,9 @@ async function run() {
             res.send(result);
         });
 
+        const { ObjectId } = require('mongodb'); // Ensure ObjectId is imported
+
+        
 
         // Change status of the product to 'Accepted' //
         app.patch('/product/accept-status/:id', verifyToken, verifyModerator, async (req, res) => {
@@ -332,7 +335,7 @@ async function run() {
         });
 
         // Add a product in featuredProducts // 
-        app.post('/featured', verifyToken, async (req, res) => {
+        app.post('/featured', verifyToken, verifyModerator, async (req, res) => {
             const product = req.body;
             const result = await featuredCollection.insertOne(product);
             res.send(result);
@@ -368,7 +371,7 @@ async function run() {
         });
 
         // Delete a product from featured //
-        app.delete('/featured/:id', verifyToken, verifyModerator, async (req, res) => {
+        app.delete('/featured/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: id };
             const result = await featuredCollection.deleteOne(query);
@@ -443,7 +446,7 @@ async function run() {
             res.send(result);
         });
 
-        
+
         // Make Admin API //
         app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
@@ -475,14 +478,14 @@ async function run() {
             const { price } = req.body;
             const finalPrice = price * 100;
 
-            const {client_secret} = await stripe.paymentIntents.create({
+            const { client_secret } = await stripe.paymentIntents.create({
                 amount: finalPrice,
                 currency: 'usd',
                 automatic_payment_methods: {
                     enabled: true,
                 },
             });
-            res.send({clientSecret: client_secret});
+            res.send({ clientSecret: client_secret });
         })
 
 
