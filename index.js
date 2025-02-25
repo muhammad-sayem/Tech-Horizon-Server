@@ -108,13 +108,13 @@ async function run() {
 
 
         // Get all users from userCollection //
-        app.get('/users', verifyToken, async (req, res) => {
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result);
         });
 
         // Change user status to subscribed //
-        app.patch('/user/status-subscribed/:id', async (req, res) => {
+        app.patch('/user/status-subscribed/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const updatedDoc = {
@@ -190,7 +190,7 @@ async function run() {
         });
 
         // Get all reported products //
-        app.get('/products/reported', async (req, res) => {
+        app.get('/products/reported', verifyToken, verifyModerator, async (req, res) => {
             const query = { reported: true };
             const result = await productsCollection.find(query).toArray();
             res.send(result);
@@ -244,7 +244,7 @@ async function run() {
 
 
         // Change status of the product to 'Accepted' //
-        app.patch('/product/accept-status/:id', async (req, res) => {
+        app.patch('/product/accept-status/:id', verifyToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const updatedDoc = {
@@ -257,7 +257,7 @@ async function run() {
         });
 
         // Change status of the product to 'Rejected' //
-        app.patch('/product/reject-status/:id', async (req, res) => {
+        app.patch('/product/reject-status/:id', verifyToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const updatedDoc = {
@@ -270,7 +270,7 @@ async function run() {
         });
 
         // Update a product if report //
-        app.patch('/product/report/:id', async (req, res) => {
+        app.patch('/product/report/:id', verifyToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
@@ -290,7 +290,7 @@ async function run() {
         });
 
         // Get all products added by an email //
-        app.get('/products/:email', async (req, res) => {
+        app.get('/products/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { "owner.email": email };
             const result = await productsCollection.find(query).toArray();
@@ -298,7 +298,7 @@ async function run() {
         });
 
         // Update a product in productsCollection //
-        app.put('/product/update/:id', async (req, res) => {
+        app.put('/product/update/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const productData = req.body;
@@ -311,7 +311,7 @@ async function run() {
         })
 
         // Update a product in featuredCollection //
-        app.put('/featured/update/:id', async (req, res) => {
+        app.put('/featured/update/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: id }
             const featuredProductData = req.body;
@@ -324,7 +324,7 @@ async function run() {
         })
 
         // Delete a product from productsCollection //
-        app.delete('/product/:id', async (req, res) => {
+        app.delete('/product/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await productsCollection.deleteOne(query);
@@ -332,7 +332,7 @@ async function run() {
         });
 
         // Add a product in featuredProducts // 
-        app.post('/featured', async (req, res) => {
+        app.post('/featured', verifyToken, async (req, res) => {
             const product = req.body;
             const result = await featuredCollection.insertOne(product);
             res.send(result);
@@ -349,7 +349,7 @@ async function run() {
         });
 
         // Update a product's featured property to true //
-        app.patch('/product/feature-true/:id', async (req, res) => {
+        app.patch('/product/feature-true/:id', verifyToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const product = await productsCollection.findOne(query);
@@ -368,7 +368,7 @@ async function run() {
         });
 
         // Delete a product from featured //
-        app.delete('/featured/:id', async (req, res) => {
+        app.delete('/featured/:id', verifyToken, verifyModerator, async (req, res) => {
             const id = req.params.id;
             const query = { _id: id };
             const result = await featuredCollection.deleteOne(query);
@@ -386,7 +386,7 @@ async function run() {
         });
 
         // Save or add a review in reviewsCollection //
-        app.post('/reviews', async (req, res) => {
+        app.post('/reviews', verifyToken, async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);
             res.send(result);
@@ -401,7 +401,7 @@ async function run() {
         });
 
         // Get admin stats api //
-        app.get('/admin-stats', async (req, res) => {
+        app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
             const usersCount = await userCollection.countDocuments();
             const productsCount = await productsCollection.countDocuments();
             const reviewsCount = await reviewsCollection.countDocuments();
@@ -410,7 +410,7 @@ async function run() {
         });
 
         // Add a coupon to the couponsCollection //
-        app.post('/add-coupon', async (req, res) => {
+        app.post('/add-coupon', verifyToken, verifyAdmin, async (req, res) => {
             const coupon = req.body;
             const result = await couponsCollection.insertOne(coupon);
             res.send(result);
@@ -423,7 +423,7 @@ async function run() {
         });
 
         // Edit a coupon's information //
-        app.put('/coupon/:id', async (req, res) => {
+        app.put('/coupon/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const couponData = req.body;
@@ -436,22 +436,14 @@ async function run() {
         })
 
         // Delete a coupon from couponsCollection //
-        app.delete('/coupon/:id', async (req, res) => {
+        app.delete('/coupon/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await couponsCollection.deleteOne(query);
             res.send(result);
         });
 
-        //
-
-
-
-
-
-
-
-
+        
         // Make Admin API //
         app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
