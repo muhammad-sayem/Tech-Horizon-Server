@@ -230,7 +230,7 @@ async function run() {
             const query = { _id: id };
             const product = await featuredCollection.findOne(query);
 
-            if (product.upVotedUsers && product.upVotedUsers.includes(userEmail)) {
+            if (product?.upVotedUsers && product?.upVotedUsers.includes(userEmail)) {
                 return res.status(400).send({ message: "You have already upvoted the product" })
             }
 
@@ -273,7 +273,7 @@ async function run() {
         });
 
         // Update a product if report //
-        app.patch('/product/report/:id', verifyToken, verifyModerator, async (req, res) => {
+        app.patch('/product/report/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
 
