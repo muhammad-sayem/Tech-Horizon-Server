@@ -124,6 +124,18 @@ async function run() {
             }
             const result = await userCollection.updateOne(query, updatedDoc);
             res.send(result);
+        });
+
+        app.get('/users/count', async(req, res) => {
+            const query = {role: "User"}
+            const numOfUsers = await userCollection.countDocuments(query);
+            res.send({count: numOfUsers})
+        });
+
+        app.get('/users/subscribed', async(req, res) => {
+            const query = {subscribed: true}
+            const numOfSubscribed = await userCollection.countDocuments(query);
+            res.send({count: numOfSubscribed});
         })
 
         // Delete a user from userCollection //
@@ -162,9 +174,6 @@ async function run() {
         // });
 
 
-
-
-
         // Get all products //
         app.get('/all-products', async (req, res) => {
             const result = await productsCollection.find().toArray();
@@ -177,6 +186,7 @@ async function run() {
             const limit = parseInt(req.query.limit) || 6;
             const skip = (page - 1) * limit;
             const query = { status: 'Accepted' }
+            const sort = req.query.sort;
 
             if (req.query.search) {
                 query.tags = {
@@ -184,7 +194,14 @@ async function run() {
                     $options: "i"
                 }
             }
-            const products = await productsCollection.find(query).skip(skip).limit(limit).toArray();
+
+            let sortOptions = {};
+
+            if(sort){
+                sortOptions = { upvotes: sort === 'asc' ? 1 : -1 }
+            }
+
+            const products = await productsCollection.find(query).sort(sortOptions).skip(skip).limit(limit).toArray();
             const totalProducts = await productsCollection.countDocuments(query)
             res.send({ products, totalProducts });
         });
