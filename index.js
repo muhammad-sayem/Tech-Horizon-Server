@@ -126,16 +126,16 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/users/count', async(req, res) => {
-            const query = {role: "User"}
+        app.get('/users/count', async (req, res) => {
+            const query = { role: "User" }
             const numOfUsers = await userCollection.countDocuments(query);
-            res.send({count: numOfUsers})
+            res.send({ count: numOfUsers })
         });
 
-        app.get('/users/subscribed', async(req, res) => {
-            const query = {subscribed: true}
+        app.get('/users/subscribed', async (req, res) => {
+            const query = { subscribed: true }
             const numOfSubscribed = await userCollection.countDocuments(query);
-            res.send({count: numOfSubscribed});
+            res.send({ count: numOfSubscribed });
         })
 
         // Delete a user from userCollection //
@@ -197,7 +197,7 @@ async function run() {
 
             let sortOptions = {};
 
-            if(sort){
+            if (sort) {
                 sortOptions = { upvotes: sort === 'asc' ? 1 : -1 }
             }
 
@@ -259,9 +259,6 @@ async function run() {
             res.send(result);
         });
 
-        const { ObjectId } = require('mongodb'); // Ensure ObjectId is imported
-
-        
 
         // Change status of the product to 'Accepted' //
         app.patch('/product/accept-status/:id', verifyToken, verifyModerator, async (req, res) => {
@@ -351,6 +348,18 @@ async function run() {
             res.send(result);
         });
 
+        // Get Products Statistics //
+        app.get('/products/stats', verifyToken, async (req, res) => {
+            const totalProducts = await Product.countDocuments();
+            const featuredProducts = await Product.countDocuments({ featured: true });
+            const normalProducts = totalProducts - featuredProducts;
+
+            console.log({ totalProducts, featuredProducts, normalProducts }); 
+
+            res.send({ totalProducts, featuredProducts, normalProducts });
+        });
+
+
         // Add a product in featuredProducts // 
         app.post('/featured', verifyToken, verifyModerator, async (req, res) => {
             const product = req.body;
@@ -422,6 +431,15 @@ async function run() {
 
         // Get admin stats api //
         app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
+            const usersCount = await userCollection.countDocuments();
+            const productsCount = await productsCollection.countDocuments();
+            const reviewsCount = await reviewsCollection.countDocuments();
+
+            res.send({ usersCount, productsCount, reviewsCount });
+        });
+
+        // Get user stats api //
+        app.get('/user-stats', verifyToken, async (req, res) => {
             const usersCount = await userCollection.countDocuments();
             const productsCount = await productsCollection.countDocuments();
             const reviewsCount = await reviewsCollection.countDocuments();
@@ -503,52 +521,7 @@ async function run() {
                 },
             });
             res.send({ clientSecret: client_secret });
-        })
-
-
-
-        // Create payment intent //
-        // app.post('/create-payment-intent', async (req, res) => {
-        //     const { totalPrice } = req.body;
-        //     const amount = parseInt(totalPrice * 100);
-
-        //     console.log("Amount inside payment intent", amount);
-
-        //     const paymentIntent = await stripe.paymentIntents.create({
-        //         amount: amount,
-        //         currency: 'usd',
-        //         payment_method_types: ['card']
-        //     });
-
-        //     res.send({
-        //         clientSecret: paymentIntent.client_secret
-        //     })
-        // });
-
-        // app.post('/payments', async (req, res) => {
-        //     const payment = req.body;
-        //     const paymentResult = await paymentCollection.insertOne(payment);
-
-        //     // Carefully delete each item from the cart //
-        //     console.log("Payment Info", payment);
-        //     const query = {
-        //         _id: {
-        //             $in: payment.cartId.map(id => new ObjectId(id))
-        //         }
-        //     };
-        //     const deleteResult = await cartCollection.deleteMany(query);
-        //     res.send({paymentResult, deleteResult});
-        // });
-
-        // app.get('/payments/:email', verifyToken, async(req, res) => {
-        //     const email = req.params.email;
-        //     const query = {email: email};
-        //     if(email !== req.decoded.email){
-        //         return res.status(403).send({message: 'Forbidden Access!!'})
-        //     }
-        //     const result = await paymentCollection.find(query).toArray();
-        //     res.send(result);
-        // });
+        });
 
 
         // Send a ping to confirm a successful connection
